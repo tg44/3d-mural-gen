@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>MuralGen</title>
+  <style type="text/css">
+    canvas {
+      border:0;
+      display:block;
+      margin:0 auto;
+      background-color: #FFFFFF;
+    }
+  </style>
+</head>
+<body style="background-color:#E6E6FA">
+<input type="file" id="heightMap" />
+
+<p>Hexa settings:</p>
+
+<div>
+  <input type="range" id="hexaTranslateX" name="X"
+         min="0" max="100" value="0">
+  <label for="hexaTranslateX">X</label>
+</div>
+
+<div>
+  <input type="range" id="hexaTranslateY" name="Y"
+         min="0" max="100" value="0">
+  <label for="hexaTranslateY">Y</label>
+</div>
+
+<input type="file" id="borderSVG" />
+
+<canvas id="hexmap" width="600" height="600"></canvas>
+<script>
+  (function(){
+    var canvas = document.getElementById('hexmap');
+    var img = new Image();
+    var border = new Image();
+    var hexagonAngle = 0.523598776; // 30 degrees in radians
+
+    var translateHexa = {x: 0, y: 0};
+
+    //HEXA render helpers
+    function drawHexas(ctx, ratio, translate) {
+      var sideLength = 50 * ratio;
+
+      ctx.fillStyle = "#000000";
+      ctx.strokeStyle = "#FF0000";
+      ctx.lineWidth = 1;
+
+      drawBoard(ctx, sideLength, translate);
+    }
+
+    function drawBoard(canvasContext, sideLength, translate) {
+      var hexHeight = Math.sin(hexagonAngle) * sideLength;
+      var hexRadius = Math.cos(hexagonAngle) * sideLength;
+      var hexRectangleWidth = 2 * hexRadius;
+
+      var i,
+        j;
+
+      //we currently can't support more than 100x100 hexa
+      for(i = -10; i < 90; ++i) {
+        for(j = -10; j < 90; ++j) {
+          drawOneHexagon(
+            canvasContext,
+            translate.x + i * hexRectangleWidth + ((j % 2) * hexRadius),
+            translate.y + j * (sideLength + hexHeight),
+            sideLength
+          );
+        }
+      }
+    }
+
+    function drawOneHexagon(ctx, x, y, sideLength) {
+      var hexRadius = Math.cos(hexagonAngle) * sideLength;
+      var hexHeight = Math.sin(hexagonAngle) * sideLength;
+      var hexRectangleHeight = sideLength + 2 * hexHeight;
+      var hexRectangleWidth = 2 * hexRadius;
+
+      ctx.beginPath();
+      ctx.moveTo(x + hexRadius, y);
+      ctx.lineTo(x + hexRectangleWidth, y + hexHeight);
+      ctx.lineTo(x + hexRectangleWidth, y + hexHeight + sideLength);
+      ctx.lineTo(x + hexRadius, y + hexRectangleHeight);
+      ctx.lineTo(x, y + sideLength + hexHeight);
+      ctx.lineTo(x, y + hexHeight);
+      ctx.closePath();
+
+      ctx.stroke();
+    }
+
+    //IMAGE render helper
+    function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
+      var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+      var rtnWidth = srcWidth * ratio;
+      var rtnHeight = srcHeight * ratio;
+      return {
+        width: rtnWidth,
+        height: rtnHeight,
+        ratio: ratio
+      };
+    }
+
+    //MAIN render
+    function render() {
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if(img.src) {
+        var imgSize = calculateAspectRatioFit(img.width, img.height, canvas.clientWidth, canvas.clientHeight);
+        ctx.drawImage(img, 0, 0, imgSize.width, imgSize.height);
+      }
+      if(border.src) {
+        ctx.drawImage(border, 0, 0, border.width, border.height);
+      }
+      drawHexas(ctx, 1, translateHexa);
+    }
+
+    //EVENT handlers
+    document.getElementById("heightMap").onchange = function(e) {
+      var URL = window.URL;
+      var url = URL.createObjectURL(e.target.files[0]);
+      img.src = url;
+
+      img.onload = function() {
+        render();
+      }
+    };
+
+    document.getElementById("borderSVG").onchange = function(e) {
+      var URL = window.URL;
+      var url = URL.createObjectURL(e.target.files[0]);
+      border.src = url;
+
+      border.onload = function() {
+        render();
+      }
+    };
+
+    document.getElementById("hexaTranslateX").onchange = function(e) {
+      translateHexa.x = e.target.valueAsNumber;
+      render();
+    };
+
+    document.getElementById("hexaTranslateY").onchange = function(e) {
+      translateHexa.y = e.target.valueAsNumber;
+      render();
+    };
+
+    render();
+
+  })();
+
+
+
+
+
+</script>
+</body>
+</html>

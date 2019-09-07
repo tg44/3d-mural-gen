@@ -1,0 +1,8 @@
+*.class
+target/
+.idea/
+*.stl
+*.gcode
+*.scad
+
+
