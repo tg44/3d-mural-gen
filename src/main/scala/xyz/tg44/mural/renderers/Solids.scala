@@ -37,7 +37,7 @@ object Solids {
   case class Text(text: String, textCentered: Boolean = false)
   case class Polygon(points: List[Point])
 
-  case class Surface(heightMap: Seq[Seq[Int]])
+  case class Surface(heightMap: Seq[Seq[Double]])
 
 
   case class Union(objs: RenderableForOps*)

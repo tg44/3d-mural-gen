@@ -167,6 +167,7 @@ object Mural {
 
   def main(args: Array[String]): Unit = {
     import concurrent.duration._
+    import xyz.tg44.mural.utils.Benchmark._
     import concurrent.Await
     import concurrent.ExecutionContext.Implicits.global
     implicit val viewer: MeshLab = MeshLab()
@@ -179,10 +180,17 @@ object Mural {
 
     val settings = BaseSettings(50, 2, 2)
     val seed = 255
-    val hm = Surface(RandomScaledHeighMap(Math.max(settings.maxXPixels, settings.maxYPixels), (settings.sideWidth/2).toInt, 5, seed))
+    //val hm = Surface(RandomScaledHeighMap(Math.max(settings.maxXPixels, settings.maxYPixels), (settings.sideWidth/2).toInt, 5, seed))
+
+    val lows = (settings.maxXPixels * settings.maxYPixels * 0.002).toInt
+    val heights = (settings.maxXPixels * settings.maxYPixels * 0.002).toInt
+    val hm2 = Surface(FixedHeighhtMap(settings.maxYPixels, settings.maxXPixels, (settings.sideWidth/2).toInt, lows, heights, 12, 1, 1000, seed)).measure("hm generatrion")
+
+    //view(hm2)
+
+
     //val hm = Empty()
     val cutter = CuttingShape.squareCutting(settings)
-    //view(Union(models(hm, settings):_*))
 
     //Await.result(Future.sequence(models(cutter, hm, settings).zipWithIndex.map{case (m,i) => Future(toSTL(m, s"test$i.stl"))}), 15.minutes)
     //saveFile(models(cutter, hm, settings).toList(12), "test.scad")
@@ -191,8 +199,8 @@ object Mural {
     //mergeFiles("test1.scad", "test2.scad", "test.scad")
     //toSTL(models(cutter, hm, settings).toList(14),"25.stl")
     //toSTL(models(cutter, hm, settings).toList(15),"26.stl")
-    val renderer = new BatchRenderer(models(cutter, hm, settings), OpenScad, 8)
-    Await.result(renderer.run, 60.minutes)
+    val renderer = new BatchRenderer(models(cutter, hm2, settings), OpenScad, 8)
+    Await.result(renderer.run, 60.minutes).measure("full generation pipeline")
   }
 
   def mergeFiles(f1: String, f2: String, fOut: String) = {
