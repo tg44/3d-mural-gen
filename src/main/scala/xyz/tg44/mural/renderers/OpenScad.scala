@@ -133,7 +133,9 @@ object OpenScad extends Renderer {
 
   implicit val textRenderer = new Renderable[Text] {
     override def render(s: Text, indent: Int): String = {
-        (" "* indent) +"text(\"" + s.text +"\""+ (if(s.textCentered) ", halign=\"center\", valign=\"center\"" else "") +");" + "\n"
+        val centered = if (s.textCentered) """, halign="center", valign="center"""" else ""
+        s"""${(" " * indent)}text("${s.text}"$centered, size=${s.size});
+           |""".stripMargin
     }
   }
 
@@ -161,6 +163,12 @@ object OpenScad extends Renderer {
       writer.close
       println(file.getAbsolutePath)
       (" "*indent) + "surface(file = \""+ file.getAbsolutePath +"\");" + "\n"
+    }
+  }
+
+  implicit val surfacefromFileRenderer = new Renderable[SurfaceFromFile] {
+    override def render(s: SurfaceFromFile, indent: Int): String = {
+      (" "*indent) + "surface(file = \""+ s.file.getAbsolutePath +"\");" + "\n"
     }
   }
 

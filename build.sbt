@@ -22,5 +22,8 @@ libraryDependencies ++= Seq(
   "net.logstash.logback" % "logstash-logback-encoder" % "6.1",
   "ch.qos.logback"       % "logback-classic"          % "1.2.3",
   "org.slf4j"            % "jul-to-slf4j"             % "1.7.28",
-  "org.codehaus.janino"  % "janino"                   % "3.1.0"
+  "org.codehaus.janino"  % "janino"                   % "3.1.0",
+  "com.sksamuel.scrimage" %% "scrimage-core" % "3.0.0-alpha4",
+  "com.sksamuel.scrimage" %% "scrimage-io-extra" % "3.0.0-alpha4",
+  "com.sksamuel.scrimage" %% "scrimage-filters" % "3.0.0-alpha4"
 )

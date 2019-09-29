@@ -1,5 +1,7 @@
 package xyz.tg44.mural.renderers
 
+import java.io.File
+
 import squants.{Angle, Length}
 import xyz.tg44.mural.renderers.Primitives._
 import xyz.tg44.mural.renderers.Renderable._
@@ -34,10 +36,11 @@ object Solids {
 
   case class Extruded[A : Extrudable](twoD: A, height: Length, center: Boolean = false)(implicit val renderable: Renderable[A])
   case class Square(width: Length, height: Length)
-  case class Text(text: String, textCentered: Boolean = false)
+  case class Text(text: String, textCentered: Boolean = false, size: Int = 10)
   case class Polygon(points: List[Point])
 
   case class Surface(heightMap: Seq[Seq[Double]])
+  case class SurfaceFromFile(file: File)
 
 
   case class Union(objs: RenderableForOps*)
