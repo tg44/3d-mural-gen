@@ -1,4 +1,4 @@
-package xyz.tg44.mural.renderers
+package xyz.tg44.openscad.utils
 
 object EverythingIsIn {
   implicit def millimeters[A](n: A)(implicit num: Numeric[A]) = squants.space.Millimeters(n)

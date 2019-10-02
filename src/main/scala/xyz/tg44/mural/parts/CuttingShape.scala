@@ -1,14 +1,14 @@
 package xyz.tg44.mural.parts
 
 import squants.space.Degrees
-import xyz.tg44.mural.renderers.Renderable
-import xyz.tg44.mural.renderers.Solids._
+import xyz.tg44.openscad.core.Renderable
+import xyz.tg44.openscad.core.Solids._
 
 object CuttingShape extends CoordinateHelper {
-  import xyz.tg44.mural.renderers.EverythingIsIn.millimeters
-  import xyz.tg44.mural.renderers.InlineOps._
-  import xyz.tg44.mural.renderers.OpenScad._
-  import xyz.tg44.mural.renderers.Renderable._
+  import xyz.tg44.openscad.utils.EverythingIsIn.millimeters
+  import xyz.tg44.openscad.core.InlineOps._
+  import xyz.tg44.openscad.renderers.OpenScad._
+  import xyz.tg44.openscad.core.Renderable._
 
   val padding = 2
 

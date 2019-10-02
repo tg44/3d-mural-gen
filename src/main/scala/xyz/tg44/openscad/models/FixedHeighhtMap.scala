@@ -1,4 +1,4 @@
-package xyz.tg44.mural.examples
+package xyz.tg44.openscad.models
 
 import scala.util.Random
 

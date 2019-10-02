@@ -1,14 +1,14 @@
-package xyz.tg44.mural.renderers
+package xyz.tg44.openscad.renderers
 
 import java.io.{BufferedWriter, PrintWriter}
-import java.nio.file.{Files, Path, Paths}
-import java.util.UUID
+import java.nio.file.{Path, Paths}
 
 import squants.space.{Length, Millimeters}
-import xyz.tg44.mural.renderers.Renderable.RenderableForOps
-import xyz.tg44.mural.renderers.Solids._
-import xyz.tg44.mural.utils.SysCmd
-import xyz.tg44.mural.viewers.Viewer
+import xyz.tg44.openscad.core.Renderable
+import xyz.tg44.openscad.core.Renderable.RenderableForOps
+import xyz.tg44.openscad.core.Solids._
+import xyz.tg44.openscad.utils.SysCmd
+import xyz.tg44.openscad.viewers.Viewer
 
 object OpenScad extends Renderer {
 
@@ -208,7 +208,7 @@ object OpenScad extends Renderer {
   }
 
   def view(obj: RenderableForOps, optionsRender: Iterable[String])(implicit viewer: Viewer): Unit = {
-    import xyz.tg44.mural.utils.Benchmark._
+    import xyz.tg44.openscad.utils.Benchmark._
     val tmpFile = java.io.File.createTempFile("scadlaModel", ".stl").measure("scad generation")
     toSTL(obj, tmpFile.getPath, optionsRender, false).measure("stl generation")
     val res = viewer.view(tmpFile)

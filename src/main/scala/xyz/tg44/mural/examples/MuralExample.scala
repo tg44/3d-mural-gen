@@ -1,23 +1,21 @@
 package xyz.tg44.mural.examples
 
 import java.io.File
-import java.nio.file.{Path, Paths}
+import java.nio.file.Paths
 
-import squants.space.Degrees
-import xyz.tg44.mural.models.OpenLock
 import xyz.tg44.mural.parts.{Base, CuttingShape, MuralSettings, Top}
-import xyz.tg44.mural.renderers.{BatchRenderer, OpenScad, Renderable}
-import xyz.tg44.mural.renderers.Solids.{Union, _}
-import xyz.tg44.mural.utils.PngHelper
-import xyz.tg44.mural.viewers.MeshLab
+import xyz.tg44.openscad.core.Renderable
+import xyz.tg44.openscad.core.Solids.{Union, _}
+import xyz.tg44.openscad.models.OpenLock
+import xyz.tg44.openscad.viewers.MeshLab
 
 import scala.concurrent.Future
 
 object MuralExample {
-  import xyz.tg44.mural.renderers.EverythingIsIn.millimeters
-  import xyz.tg44.mural.renderers.InlineOps._
-  import xyz.tg44.mural.renderers.Renderable._
-  import xyz.tg44.mural.renderers.OpenScad._
+  import xyz.tg44.openscad.core.InlineOps._
+  import xyz.tg44.openscad.core.Renderable._
+  import xyz.tg44.openscad.renderers.OpenScad._
+  import xyz.tg44.openscad.utils.EverythingIsIn.millimeters
 
   def models[A: Extrudable : Renderable](cutter: A, heightMap: RenderableForOps, settings: MuralSettings) = {
     val tiles = for{
@@ -37,10 +35,11 @@ object MuralExample {
   val magicCube = Difference(Cube(16,20,8), OpenLock.clipcut(0.2).move(16, 10, 0))
 
   def main(args: Array[String]): Unit = {
-    import concurrent.duration._
-    import xyz.tg44.mural.utils.Benchmark._
+    import xyz.tg44.openscad.utils.Benchmark._
+
     import concurrent.Await
     import concurrent.ExecutionContext.Implicits.global
+    import concurrent.duration._
     implicit val viewer: MeshLab = MeshLab()
 
     //saveFile(models(50, 255), "test.scad")
@@ -83,6 +82,7 @@ object MuralExample {
 
   def mergeFiles(f1: String, f2: String, fOut: String) = {
     import java.io._
+
     import scala.io.Source
     val part0 = Source.fromFile(f1).getLines
     val part1 = Source.fromFile(f2).getLines

@@ -10,11 +10,12 @@ import akka.stream.scaladsl.Flow
 import akka.stream.{ActorMaterializer, Materializer}
 import spray.json.{JsValue, JsonReader, RootJsonFormat}
 import xyz.tg44.mural.parts.{Base, CuttingShape, MuralSettings, Top}
-import xyz.tg44.mural.renderers.OpenScad
-import xyz.tg44.mural.renderers.Renderable.RenderableForOps
-import xyz.tg44.mural.renderers.Solids.{SurfaceFromFile, Union}
-import xyz.tg44.mural.utils.AmpqHelper.CommitableWrapper
-import xyz.tg44.mural.utils.{AmpqHelper, S3Uploader}
+import xyz.tg44.openscad.renderers.OpenScad
+import xyz.tg44.openscad.core.Renderable.RenderableForOps
+import xyz.tg44.openscad.core.Solids.{SurfaceFromFile, Union}
+import xyz.tg44.pipeline.AmpqHelper.CommitableWrapper
+import xyz.tg44.pipeline.S3Uploader
+import xyz.tg44.pipeline.{AmpqHelper, S3Uploader}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,8 +39,8 @@ object MuralGenerator {
 
 
   def model(msg: MuralMessage, img: File, workDir: Path): RenderableForOps = {
-    import xyz.tg44.mural.renderers.OpenScad._
-    import xyz.tg44.mural.renderers.Renderable._
+    import xyz.tg44.openscad.renderers.OpenScad._
+    import xyz.tg44.openscad.core.Renderable._
 
     val settings = MuralSettings(msg.sideWidth, msg.maxXCoordinates, msg.maxYCoordinates, workDir)
     val cutter = CuttingShape.squareCutting(settings)

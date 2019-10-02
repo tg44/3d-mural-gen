@@ -1,4 +1,4 @@
-package xyz.tg44.mural.viewers
+package xyz.tg44.openscad.viewers
 
 import java.io.File
 

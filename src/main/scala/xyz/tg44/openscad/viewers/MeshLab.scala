@@ -1,8 +1,8 @@
-package xyz.tg44.mural.viewers
+package xyz.tg44.openscad.viewers
 
 import java.io.File
 
-import xyz.tg44.mural.utils.SysCmd
+import xyz.tg44.openscad.utils.SysCmd
 
 case class MeshLab() extends Viewer {
 

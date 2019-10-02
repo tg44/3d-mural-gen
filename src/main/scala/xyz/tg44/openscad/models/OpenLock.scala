@@ -1,11 +1,11 @@
-package xyz.tg44.mural.models
+package xyz.tg44.openscad.models
 
-import xyz.tg44.mural.renderers.Primitives.Point
-import xyz.tg44.mural.renderers.Renderable
-import xyz.tg44.mural.renderers.Renderable._
-import xyz.tg44.mural.renderers.InlineOps._
-import xyz.tg44.mural.renderers.Solids._
-import xyz.tg44.mural.renderers.EverythingIsIn.millimeters
+import xyz.tg44.openscad.core.Primitives.Point
+import xyz.tg44.openscad.core.Renderable._
+import xyz.tg44.openscad.core.InlineOps._
+import xyz.tg44.openscad.core.Renderable
+import xyz.tg44.openscad.core.Solids._
+import xyz.tg44.openscad.utils.EverythingIsIn.millimeters
 
 //rewritten based on https://github.com/caitlynb/OpenSCAD-OpenLock/blob/master/OpenLock.scad
 // its pozitioned to 0 at Z, 0 to negative direction by X and middle by Y

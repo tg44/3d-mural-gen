@@ -1,12 +1,12 @@
 package xyz.tg44.mural.parts
 
-import xyz.tg44.mural.renderers.Renderable
-import xyz.tg44.mural.renderers.Solids.Translate
+import xyz.tg44.openscad.core.Renderable
+import xyz.tg44.openscad.core.Solids.Translate
 
 trait CoordinateHelper {
-  import xyz.tg44.mural.renderers.EverythingIsIn.millimeters
-  import xyz.tg44.mural.renderers.InlineOps._
-  import xyz.tg44.mural.renderers.Renderable._
+  import xyz.tg44.openscad.utils.EverythingIsIn.millimeters
+  import xyz.tg44.openscad.core.InlineOps._
+  import xyz.tg44.openscad.core.Renderable._
 
   def getXYCoordinates(x: Int, y: Int, settings: MuralSettings) = {
     val yMoveStep = Math.sqrt(3)*settings.shortSide / 2

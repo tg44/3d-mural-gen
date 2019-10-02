@@ -1,6 +1,6 @@
-package xyz.tg44.mural.renderers
+package xyz.tg44.openscad.core
 
-import squants.space.{Angle, AngleUnit, Area, Length, LengthUnit, Millimeters, Radians}
+import squants.space._
 
 object Primitives {
   case class Point(x: Length, y: Length, z: Length) {

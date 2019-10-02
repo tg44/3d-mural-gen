@@ -1,4 +1,4 @@
-package xyz.tg44.mural.utils
+package xyz.tg44.pipeline
 
 import java.nio.file.Path
 

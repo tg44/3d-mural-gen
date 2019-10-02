@@ -1,4 +1,4 @@
-package xyz.tg44.mural.renderers
+package xyz.tg44.openscad.core
 
 import java.nio.file.Path
 

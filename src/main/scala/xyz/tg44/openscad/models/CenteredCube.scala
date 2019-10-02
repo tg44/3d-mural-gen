@@ -1,9 +1,9 @@
-package xyz.tg44.mural.models
+package xyz.tg44.openscad.models
 
 import squants.Length
-import xyz.tg44.mural.renderers.Renderable
-import xyz.tg44.mural.renderers.Solids._
+import xyz.tg44.openscad.core.Solids._
 import squants.space.LengthConversions._
+import xyz.tg44.openscad.core.Renderable
 
 object CenteredCube {
 

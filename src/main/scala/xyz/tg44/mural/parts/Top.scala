@@ -3,14 +3,14 @@ package xyz.tg44.mural.parts
 import java.io.File
 
 import squants.space.Degrees
-import xyz.tg44.mural.renderers.Solids.{Cube, Intersection, SurfaceFromFile, Union}
-import xyz.tg44.mural.utils.PngHelper
+import xyz.tg44.openscad.core.Solids.{Cube, Intersection, SurfaceFromFile, Union}
+import xyz.tg44.openscad.utils.PngHelper
 
 object Top extends CoordinateHelper {
-  import xyz.tg44.mural.renderers.EverythingIsIn.millimeters
-  import xyz.tg44.mural.renderers.InlineOps._
-  import xyz.tg44.mural.renderers.OpenScad._
-  import xyz.tg44.mural.renderers.Renderable._
+  import xyz.tg44.openscad.utils.EverythingIsIn.millimeters
+  import xyz.tg44.openscad.core.InlineOps._
+  import xyz.tg44.openscad.renderers.OpenScad._
+  import xyz.tg44.openscad.core.Renderable._
 
   def top(sideWidth: Double, hm: RenderableForOps): RenderableForOps = {
     val length = Math.sqrt(3) / 2.0 * sideWidth

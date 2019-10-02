@@ -1,4 +1,4 @@
-package xyz.tg44.mural.utils
+package xyz.tg44.openscad.utils
 
 import java.io.File
 

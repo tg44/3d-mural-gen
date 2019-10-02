@@ -1,10 +1,10 @@
-package xyz.tg44.mural.renderers
+package xyz.tg44.openscad.core
 
 import squants.space.Degrees
 import squants.{Angle, Length}
-import xyz.tg44.mural.renderers.Renderable._
-import xyz.tg44.mural.renderers.Solids._
-import xyz.tg44.mural.renderers.Primitives._
+import xyz.tg44.openscad.core.Primitives._
+import xyz.tg44.openscad.core.Renderable._
+import xyz.tg44.openscad.core.Solids._
 
 object InlineOps {
   object any2stringadd

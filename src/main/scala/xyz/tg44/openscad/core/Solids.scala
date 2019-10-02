@@ -1,11 +1,10 @@
-package xyz.tg44.mural.renderers
+package xyz.tg44.openscad.core
 
 import java.io.File
 
 import squants.{Angle, Length}
-import xyz.tg44.mural.renderers.Primitives._
-import xyz.tg44.mural.renderers.Renderable._
-
+import xyz.tg44.openscad.core.Primitives._
+import xyz.tg44.openscad.core.Renderable.RenderableForOps
 
 object Solids {
 
