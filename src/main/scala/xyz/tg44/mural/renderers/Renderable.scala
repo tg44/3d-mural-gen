@@ -1,7 +1,9 @@
 package xyz.tg44.mural.renderers
 
+import java.nio.file.Path
+
 trait Renderable[A] {
-  def render(s: A, indent: Int): String
+  def render(s: A, indent: Int)(implicit context: Path): String
 }
 
 object Renderable {
@@ -12,8 +14,8 @@ object Renderable {
     val fa: Renderable[INNER]
 
     override def toString: String = a.toString
-    def render(indent: Int): String = fa.render(a, indent)
-    def renderWithHeader: String = {
+    def render(indent: Int)(implicit context: Path): String = fa.render(a, indent)
+    def renderWithHeader(implicit context: Path): String = {
       """$fa=4;
         |$fs=0.5;
         |""".stripMargin + render(0)

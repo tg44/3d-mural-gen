@@ -11,6 +11,7 @@ import xyz.tg44.mural.renderers.Renderable.RenderableForOps
 import scala.concurrent.Future
 
 class BatchRenderer(list: Seq[RenderableForOps], renderer: Renderer, paralellism: Int = 8, prefix: String = "") {
+  import xyz.tg44.mural.utils.Benchmark._
 
   def run = {
     implicit val system = ActorSystem("test")
@@ -24,7 +25,7 @@ class BatchRenderer(list: Seq[RenderableForOps], renderer: Renderer, paralellism
 
     val stream = Source(list.toList)
       .zipWithIndex
-      .mapAsyncUnordered(paralellism){case (m,i) => Future(renderer.toSTL(m, s"$prefix$i.stl"))}
+      .mapAsyncUnordered(paralellism){case (m,i) => Future(renderer.toSTL(m, s"$prefix$i.stl").measure(s"stl generation on $i"))}
       .runWith(Sink.ignore)
 
     stream.onComplete(_ => system.terminate)

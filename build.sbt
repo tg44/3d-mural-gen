@@ -25,5 +25,8 @@ libraryDependencies ++= Seq(
   "org.codehaus.janino"  % "janino"                   % "3.1.0",
   "com.sksamuel.scrimage" %% "scrimage-core" % "3.0.0-alpha4",
   "com.sksamuel.scrimage" %% "scrimage-io-extra" % "3.0.0-alpha4",
-  "com.sksamuel.scrimage" %% "scrimage-filters" % "3.0.0-alpha4"
+  "com.sksamuel.scrimage" %% "scrimage-filters" % "3.0.0-alpha4",
+  "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "1.1.1",
+  "com.lightbend.akka" %% "akka-stream-alpakka-amqp" % "1.1.1",
+  "io.spray" %%  "spray-json" % "1.3.4"
 )
