@@ -28,5 +28,6 @@ libraryDependencies ++= Seq(
   "com.sksamuel.scrimage" %% "scrimage-filters" % "3.0.0-alpha4",
   "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "1.1.1",
   "com.lightbend.akka" %% "akka-stream-alpakka-amqp" % "1.1.1",
-  "io.spray" %%  "spray-json" % "1.3.4"
+  "io.spray" %%  "spray-json" % "1.3.4",
+  "org.typelevel"         %% "cats-core"  % "2.0.0-RC2",
 )
