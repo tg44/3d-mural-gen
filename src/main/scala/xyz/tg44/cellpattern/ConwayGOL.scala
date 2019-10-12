@@ -13,18 +13,18 @@ object ConwayGOL {
     }
   }
 
-  def evolveMultiple(n: Int, cells: Set[Cell]): List[Set[Cell]] = {
+  def multipleEvolutions(n: Int, cells: Set[Cell]): List[Set[Cell]] = {
     @tailrec
-    def rec(n: Int, cells: Set[Cell], acc: List[Set[Cell]]): List[Set[Cell]] = {
+    def rec(n: Int, acc: List[Set[Cell]]): List[Set[Cell]] = {
       if(n>0) {
-        val e = evolve(cells)
-        rec(n-1, e, e :: acc)
+        val e = evolve(acc.head)
+        rec(n-1, e :: acc)
       } else {
         acc
       }
     }
 
-    rec(n, cells, cells :: Nil).reverse
+    rec(n, cells :: Nil).reverse
   }
 
   private def candidateCells(cells: Set[Cell]): Set[Cell] = {

@@ -4,8 +4,9 @@ import cats.Monoid
 import squants.space.{Angle, Degrees}
 import xyz.tg44.cellpattern.CellPatternExample.BridgeTest
 import xyz.tg44.cellpattern.ConwayGOL.Cell
-import xyz.tg44.openscad.core.Solids.{Difference, Empty, Union}
+import xyz.tg44.openscad.core.Solids.{Difference, Empty, Intersection, Union}
 import xyz.tg44.openscad.models.CenteredCube
+import xyz.tg44.openscad.renderers.OpenScad
 import xyz.tg44.openscad.viewers.MeshLab
 
 object CellPatternExample {
@@ -24,7 +25,7 @@ object CellPatternExample {
 
   case class Coordinate(x: Int, y: Int)
 
-  case class CellPatternSettings(cubeSize: Int, layerHeight: Double) {
+  case class CellPatternSettings(cubeSize: Int, layerHeight: Double, bigSupports: Boolean = false) {
     lazy val moveDistance = cubeSize-layerHeight
   }
 
@@ -47,23 +48,47 @@ object CellPatternExample {
   val right = Coordinate(1, 0)
   val top = Coordinate(0, 1)
   val bottom = Coordinate(0, -1)
+  val topLeft = Coordinate(-1, 1)
+  val topRight = Coordinate(1, 1)
+  val bottomLeft = Coordinate(-1, -1)
+  val bottomRight = Coordinate(1, -1)
 
   def generateSupport(prevCells: Set[Coordinate], livingCells: Set[Coordinate])(implicit settings: CellPatternSettings): RenderableForOps = {
-    val cuttingSize = Math.sqrt(2*settings.cubeSize*settings.cubeSize)
+    val cutting = settings.cubeSize-settings.layerHeight
+    val cuttingSize = Math.sqrt(2*cutting*cutting)
     val halfCube = Difference(
       CenteredCube.xy(settings.cubeSize, settings.cubeSize, settings.cubeSize),
       CenteredCube(cuttingSize, cuttingSize, cuttingSize).rotateX(Degrees(45)).moveY(-settings.cubeSize/2.0)
     )
-    def rotateHalfCube(c: Coordinate, nb: Coordinate): RenderableForOps = {
-      if((left |+| c) == nb) {
-        halfCube.rotateZ(Degrees(90))
-      } else if((right |+| c) == nb) {
-        halfCube.rotateZ(Degrees(-90))
-      } else if((top |+| c) == nb) {
-        halfCube
+    val quarterCube = Difference(
+      Intersection(halfCube, halfCube.rotateZ(Degrees(90))).rotateZ(Degrees(90))
+    )
+    def rotateToPositionDiagonal(shape: RenderableForOps,c: Coordinate, nb: Coordinate): RenderableForOps = {
+      if((bottomRight |+| c) == nb) {
+        shape.rotateZ(Degrees(90))
+      } else if((bottomRight |+| c) == nb) {
+        shape.rotateZ(Degrees(-90))
+      } else if((topRight |+| c) == nb) {
+        shape.rotateZ(Degrees(180))
       } else {
-        halfCube.rotateZ(Degrees(180))
+        shape
       }
+    }
+    def rotateToPositionSide(shape: RenderableForOps,c: Coordinate, nb: Coordinate): RenderableForOps = {
+      if((left |+| c) == nb) {
+        shape.rotateZ(Degrees(90))
+      } else if((right |+| c) == nb) {
+        shape.rotateZ(Degrees(-90))
+      } else if((top |+| c) == nb) {
+        shape
+      } else {
+        shape.rotateZ(Degrees(180))
+      }
+    }
+    def generateCornerSupport(edges: Set[Coordinate], c: Coordinate) = {
+      val negatedC = Coordinate(c.x * -1, c.y * -1)
+      val choosenCorner = edges.combineWithEach(negatedC).reduce(_ |+| _) |+| c
+      rotateToPositionDiagonal(quarterCube, c, choosenCorner)
     }
 
     Union(
@@ -81,11 +106,19 @@ object CellPatternExample {
           } else {
             //the cases are separated for later adjustment options
             if(verticesCoveredByEdges.size == 3) {
-              Union(prevEdges.map(e => rotateHalfCube(c, e)).toSeq: _*).translate(c.x * settings.moveDistance, c.y * settings.moveDistance, 0)
+              if(settings.bigSupports) {
+                Union(prevEdges.map(e => rotateToPositionSide(halfCube, c, e)).toSeq: _*).translate(c.x * settings.moveDistance, c.y * settings.moveDistance, 0)
+              } else {
+                generateCornerSupport(coveredVertices, c).translate(c.x * settings.moveDistance, c.y * settings.moveDistance, 0)
+              }
             } else if(verticesCoveredByEdges.size == 2) {
-              Union(prevEdges.map(e => rotateHalfCube(c, e)).toSeq: _*).translate(c.x * settings.moveDistance, c.y * settings.moveDistance, 0)
+              Union(prevEdges.map(e => rotateToPositionSide(halfCube,c, e)).toSeq: _*).translate(c.x * settings.moveDistance, c.y * settings.moveDistance, 0)
             } else {
-              throw new Exception(s"can't support this layout; edges: $prevEdges diagonals: $prevDiagonals")
+              if(settings.bigSupports) {
+                Union(prevDiagonals.map(d => rotateToPositionDiagonal(quarterCube, c, d)).toSeq: _*).translate(c.x * settings.moveDistance, c.y * settings.moveDistance, 0)
+              } else {
+                generateCornerSupport(coveredVertices, c).translate(c.x * settings.moveDistance, c.y * settings.moveDistance, 0)
+              }
             }
           }
         }
@@ -102,15 +135,22 @@ object CellPatternExample {
 
     implicit val settings = CellPatternSettings(8, 0.2)
 
-    val layersAsCells = ConwayGOL.evolveMultiple(12, ConwayGOL.methuselahs.rPentomino).zipWithIndex
-    val tower = Union(layersAsCells.map { case (cells, i) => generateLayer(cells).moveZ(settings.moveDistance * i) }: _*)
+    val layersAsCells = ConwayGOL.multipleEvolutions(25, ConwayGOL.methuselahs.rPentomino)
+    val layerPairs = layersAsCells.zip(layersAsCells.tail)
+    val tower = Union(layersAsCells.zipWithIndex.map { case (cells, i) => generateLayer(cells).moveZ(settings.moveDistance * i) }: _*)
+    val supports = Union(layerPairs.zipWithIndex.map{case ((first, second), i) => generateSupport(first, second).moveZ(settings.moveDistance * i)}: _*)
 
-    //view(tower)
+    view(Union(tower, supports))
 
-    val bridgeTestCubes = Union(BridgeTest.allPositioned.map{case (second, first) => Union(generateLayer(first), generateLayer(Set(second)).moveZ(settings.moveDistance))}: _*)
-    val bridgeTestLayers = Union(BridgeTest.allPositioned.map{case (second, first) => generateSupport(first, Set(second))}: _*)
+    //val bridgeTestCubes = Union(BridgeTest.allPositioned.map{case (second, first) => Union(generateLayer(first), generateLayer(Set(second)).moveZ(settings.moveDistance))}: _*)
+    //val bridgeTestLayers = Union(BridgeTest.allPositioned.map{case (second, first) => generateSupport(first, Set(second))}: _*)
 
-    saveFile(Union(bridgeTestCubes, bridgeTestLayers), "test.scad")
+    //val bridgeTestTest = Union(generateLayer(BridgeTest.threeEdge), generateLayer(Set(BridgeTest.middle)).moveZ(settings.moveDistance))
+    //val bridgeTestTestLayers = generateSupport(BridgeTest.threeEdge, Set(BridgeTest.middle))
+
+
+    //saveFile(Union(bridgeTestCubes, bridgeTestLayers), "test.scad")
+    //toSTL(Union(bridgeTestCubes, bridgeTestLayers), "test.stl")
     //view(Union(bridgeTestCubes, bridgeTestLayers))
   }
 
@@ -139,6 +179,7 @@ object CellPatternExample {
     val edgeAndVertex = Set(Coordinate(-1, 0), Coordinate(1, 1))
     val edgeAnd2Vertex = Set(Coordinate(-1, 0), Coordinate(1, 1), Coordinate(1, -1))
     val twoEdgeAndVertex = Set(Coordinate(-1, 0), Coordinate(0, -1), Coordinate(1, 1))
+    val threeEdge = Set(Coordinate(-1, -1), Coordinate(1, -1), Coordinate(1, 1))
 
     val all = Seq(
       under,
@@ -148,7 +189,8 @@ object CellPatternExample {
       twoEdgeV2,
       edgeAndVertex,
       edgeAnd2Vertex,
-      twoEdgeAndVertex
+      twoEdgeAndVertex,
+      threeEdge
     )
 
     val allPositioned = all

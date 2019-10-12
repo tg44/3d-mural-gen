@@ -199,7 +199,7 @@ object OpenScad extends Renderer {
   }
 
   def toSTL(obj: RenderableForOps, outputFile: String, options: Iterable[String], keepFile: Boolean): (Int, String, String) = {
-    val scadFile = Paths.get(outputFile).getParent.resolve("model.scad")
+    val scadFile = Paths.get(outputFile).toAbsolutePath.getParent.resolve("model.scad")
     writeInFile(scadFile.toFile, obj)(scadFile.getParent)
     val cmd = Array(command, scadFile.toString, "-o", outputFile) ++ options
     val res = SysCmd(cmd)
