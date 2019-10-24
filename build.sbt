@@ -30,4 +30,9 @@ libraryDependencies ++= Seq(
   "com.lightbend.akka" %% "akka-stream-alpakka-amqp" % "1.1.1",
   "io.spray" %%  "spray-json" % "1.3.4",
   "org.typelevel"         %% "cats-core"  % "2.0.0-RC2",
+  "com.github.pureconfig" %% "pureconfig" % "0.12.1",
+  "org.scalatest"          %% "scalatest"         % "3.0.4"   % Test,
+  "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.8",
 )
+
+enablePlugins(JavaAppPackaging)

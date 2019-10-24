@@ -14,8 +14,7 @@ object CellPatternExample {
   def main(args: Array[String]): Unit = {
     implicit val viewer: MeshLab = MeshLab()
 
-    implicit val settings = CellPatternSettings(8, 0.2)
-
+    implicit val settings = CellPatternSettings(8, 0.2, false)
     val layersAsCells: Seq[Set[ConwayGOL.Cell]] = ConwayGOL.multipleEvolutions(25, ConwayGOL.methuselahs.rPentomino)
 
     val tower = Tower.generate(layersAsCells)

@@ -8,37 +8,24 @@ import akka.actor.ActorSystem
 import akka.stream.alpakka.amqp.scaladsl.CommittableReadResult
 import akka.stream.scaladsl.Flow
 import akka.stream.{ActorMaterializer, Materializer}
+import org.slf4j.LoggerFactory
 import spray.json.{JsValue, JsonReader, RootJsonFormat}
+import xyz.tg44.cellpattern.ConwayTowerGenerator.logger
 import xyz.tg44.mural.parts.{Base, CuttingShape, MuralSettings, Top}
 import xyz.tg44.openscad.renderers.OpenScad
 import xyz.tg44.openscad.core.Renderable.RenderableForOps
 import xyz.tg44.openscad.core.Solids.{SurfaceFromFile, Union}
-import xyz.tg44.pipeline.AmpqHelper.CommitableWrapper
-import xyz.tg44.pipeline.S3Uploader
-import xyz.tg44.pipeline.{AmpqHelper, S3Uploader}
+import xyz.tg44.pipeline.AmqpHelper.JobReader
+import xyz.tg44.pipeline.GeneratorFlow.Generator
+import xyz.tg44.pipeline.{AmqpHelper, S3Uploader}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MuralGenerator {
-  import xyz.tg44.mural.consumer.MuralGenerator._
-
-  import concurrent.ExecutionContext.Implicits._
-  lazy val paralellism: Int = Runtime.getRuntime.availableProcessors()
-  implicit val actorSystem = ActorSystem("mural-gen")
-  implicit val materializer = ActorMaterializer()
-
-  val flow = Flow[MuralMessage]
-    .mapAsyncUnordered(paralellism)(createTheModel)
-    .mapAsyncUnordered(paralellism*2)((uploadTheModel _).tupled)
-
-  val stream = AmpqHelper.getConsumer("mural",flow)
-
-}
-
 object MuralGenerator {
+  private val logger = LoggerFactory.getLogger("MuralGenerator")
+  import xyz.tg44.openscad.utils.Benchmark._
 
-
-  def model(msg: MuralMessage, img: File, workDir: Path): RenderableForOps = {
+  private def model(msg: MuralJob, img: File, workDir: Path): RenderableForOps = {
     import xyz.tg44.openscad.renderers.OpenScad._
     import xyz.tg44.openscad.core.Renderable._
 
@@ -51,7 +38,7 @@ object MuralGenerator {
     CuttingShape.makeCutting(cutter, hexa, msg.i, msg.j, settings)
   }
 
-  def downloadImg(imageUrl: String, workDir: Path)(implicit executionContext: ExecutionContext): Future[File] = {
+  private def downloadImg(imageUrl: String, workDir: Path)(implicit executionContext: ExecutionContext): Future[File] = {
     import java.net.URL
 
     import sys.process._
@@ -59,43 +46,22 @@ object MuralGenerator {
     Future(new URL(imageUrl) #> file !!).map(_ => file)
   }
 
-  def createTheModel(msg: MuralMessage)(implicit executionContext: ExecutionContext): Future[(MuralMessage, Path)] = {
+  private def createTheModel(msg: MuralJob)(implicit executionContext: ExecutionContext): Future[Path] = {
     val workDir = Files.createTempDirectory("tmp-");
     for {
       img <- downloadImg(msg.imageUrl, workDir)
-      model <- Future(model(msg, img, workDir))
-      _ <- Future(OpenScad.toSTL(model, s"$workDir/out.stl", true))
+      model <- Future(model(msg, img, workDir)).measure(s"${msg.requestId} ${msg.i},${msg.j} - model",logger)
+      _ <- Future(OpenScad.toSTL(model, s"$workDir/out.stl", true)).measure(s"${msg.requestId} ${msg.i},${msg.j} - stl",logger)
     } yield {
-      (msg, workDir)
+      workDir
     }
   }
 
-  def uploadTheModel(msg: MuralMessage, workDir: Path)(implicit executionContext: ExecutionContext, materializer: Materializer) = {
-    def deleteDirectory(dir: Path) = {
-      Files.walk(dir)
-        .sorted(Comparator.reverseOrder())
-        .map[File](_.toFile)
-        .forEach(_.delete);
-    }
-    val upload = S3Uploader.upload(workDir.resolve("out.stl"), s"${msg.outputPrefix}-${msg.i}-${msg.j}.stl")
-    upload
-      .flatMap(_ => Future(deleteDirectory(workDir)))
-      .map(_ => msg)
+  private def uploadTheModel(msg: MuralJob, workDir: Path)(implicit executionContext: ExecutionContext, materializer: Materializer, s3Helper: S3Uploader) = {
+    S3Uploader.uploadModel(s"${msg.requestId}/${msg.outputPrefix}-${msg.i}-${msg.j}.stl", workDir, logger)
   }
 
-  case class MuralMessage(
-    requestId: String,
-    imageUrl: String,
-    outputPrefix: String,
-    sideWidth: Double,
-    maxXCoordinates: Int,
-    maxYCoordinates: Int,
-    i: Int,
-    j: Int,
-    commitable: CommittableReadResult
-  )
-
-  case class MuralMessageData(
+  case class MuralJob(
     requestId: String,
     imageUrl: String,
     outputPrefix: String,
@@ -107,21 +73,18 @@ object MuralGenerator {
   )
 
   import spray.json.DefaultJsonProtocol._
-  implicit val MuralMessageDataSerialization: RootJsonFormat[MuralMessageData] = jsonFormat8(MuralMessageData)
+  implicit val MuralJobFormat: RootJsonFormat[MuralJob] = jsonFormat8(MuralJob)
 
-  implicit val MuralMessageCommitable: CommitableWrapper[MuralMessage] = new CommitableWrapper[MuralMessage] {
-    override def getCommittable(a: MuralMessage): CommittableReadResult = a.commitable
-
-    override def reader(c: CommittableReadResult): JsonReader[MuralMessage] = {
-      new JsonReader[MuralMessage]{
-        def read(value: JsValue): MuralMessage = {
-          (MuralMessage.apply _).tupled(MuralMessageData.unapply(value.convertTo[MuralMessageData]).get.append(c))
-        }
-      }
-    }
+  lazy val MuralJobReader = new JobReader{
+    override type B = MuralJob
+    override val formatter: RootJsonFormat[MuralJob] = MuralJobFormat
+    override val generator: Generator[MuralJob] = MuralGenerator
   }
 
-  implicit class TupOps8[A, B, C, D, E, F, G, H](val x: (A, B, C, D, E, F, G, H)) extends AnyVal {
-    def append[I](y: I) = (x._1, x._2, x._3, x._4, x._5, x._6, x._7, x._8, y)
+  lazy val MuralGenerator = new Generator[MuralJob] {
+    override def createModel(a: MuralJob)(workerContext: ExecutionContext): Future[Path] = createTheModel(a)(workerContext)
+    override def uploadModel(msg: MuralJob, workDir: Path)(implicit executionContext: ExecutionContext, materializer: Materializer, s3Helper: S3Uploader): Future[Unit] = {
+      uploadTheModel(msg, workDir)
+      }.map(_ => ())
   }
 }
