@@ -21,7 +21,7 @@ class S3UploaderSpec extends WordSpecLike {
 
   "uploader" should {
 
-    "upload" in {
+    "upload" ignore {
       val u = new S3Uploader(S3Config("test"))
       await(u.upload(Paths.get("N36W113.png"), "N36W113.png"))
     }
