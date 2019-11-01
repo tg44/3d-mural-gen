@@ -1,0 +1,11 @@
+name: k8s
+subcomponents:
+- name: monitoring
+  type: component
+  method: "local"
+  path: "./monitoring-stack"
+- name: rabbitmq
+  type: helm
+  method: "git"
+  source: "https://github.com/helm/charts"
+  path: "stable/rabbitmq"

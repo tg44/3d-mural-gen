@@ -5,3 +5,4 @@ target/
 *.gcode
 *.scad
 out/
+k8s/

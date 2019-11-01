@@ -1,0 +1,9 @@
+subcomponents:
+  rabbitmq:
+    config:
+      persistence:
+        size: "1Gi"
+        storageClassName: standard
+        accessMode: ReadWriteMany
+      metrics:
+        enabled: true

@@ -15,6 +15,6 @@ USER root
 RUN adduser --system -u 1001 mural
 USER 1001
 EXPOSE 9000
-ENTRYPOINT ["/app/bin/mural-example"]
+ENTRYPOINT ["/app/bin/generator-pipeline-main"]
 CMD []
 COPY --from=builder --chown=1001:root /app/target/universal/stage /app

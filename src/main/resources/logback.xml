@@ -4,15 +4,56 @@
 
     <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
 
-
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>[%-5level] %d{HH:mm:ss.SSS} - %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
+    <if condition='isDefined("LOG_CONSOLE_JSON")'>
+        <then>
+            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+            </appender>
+        </then>
+        <else>
+            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>[%-5level] %d{HH:mm:ss.SSS} - %logger{36} - %msg%n</pattern>
+                </encoder>
+            </appender>
+        </else>
+    </if>
 
     <root level="${ROOT_LOGGING_LEVEL:-INFO}">
         <appender-ref ref="CONSOLE"/>
     </root>
+
+    <if condition='isDefined("LOG_FILE_JSON")'>
+        <then>
+            <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${LOG_FILE_JSON}</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${LOG_FILE_JSON}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+                    <maxHistory>7</maxHistory>
+                </rollingPolicy>
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+            </appender>
+            <root level="${ROOT_LOGGING_LEVEL:-INFO}">
+                <appender-ref ref="FILE"/>
+            </root>
+        </then>
+    </if>
+    <if condition='isDefined("LOG_FILE_HUMAN")'>
+        <then>
+            <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${LOG_FILE_HUMAN}</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${LOG_FILE_HUMAN}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+                    <maxHistory>7</maxHistory>
+                </rollingPolicy>
+                <encoder>
+                    <pattern>[%-5level] %d{HH:mm:ss.SSS} - %logger{36} - %msg%n</pattern>
+                </encoder>
+            </appender>
+            <root level="${ROOT_LOGGING_LEVEL:-INFO}">
+                <appender-ref ref="FILE"/>
+            </root>
+        </then>
+    </if>
 
 </configuration>

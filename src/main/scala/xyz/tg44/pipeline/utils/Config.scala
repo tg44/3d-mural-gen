@@ -14,7 +14,7 @@ class Config {
 
 object Config {
 
-  case class AmqpConf(url: String)
+  case class AmqpConf(host: String, port: Int, user: String, pass: String)
   case class S3Config(bucket: String)
 
 }

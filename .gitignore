@@ -5,4 +5,10 @@ target/
 *.gcode
 *.scad
 .env
-
+k8s/components/
+k8s/*/components/
+k8s/generated/
+k8s/*/generated/
+k8s/helm_repos/
+k8s/*/helm_repos/
+k8s/*.lock

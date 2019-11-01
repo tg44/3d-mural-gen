@@ -3,7 +3,7 @@ package xyz.tg44.pipeline
 import akka.Done
 import akka.actor.ActorSystem
 import akka.stream.alpakka.amqp.scaladsl.{AmqpSink, AmqpSource, CommittableReadResult}
-import akka.stream.alpakka.amqp.{AmqpUriConnectionProvider, AmqpWriteSettings, NamedQueueSourceSettings, QueueDeclaration}
+import akka.stream.alpakka.amqp.{AmqpCredentials, AmqpDetailsConnectionProvider, AmqpUriConnectionProvider, AmqpWriteSettings, NamedQueueSourceSettings, QueueDeclaration}
 import akka.stream.scaladsl.{Keep, RunnableGraph, Sink, Source, SourceQueueWithComplete}
 import akka.stream.{ActorAttributes, OverflowStrategy, Supervision}
 import akka.util.ByteString
@@ -30,7 +30,7 @@ class AmqpHelper(conf: AmqpConf) {
     }
 
     val queueDeclaration = QueueDeclaration(queueName)
-    val connectionProvider = AmqpUriConnectionProvider(conf.url)
+    val connectionProvider = AmqpDetailsConnectionProvider(conf.host, conf.port).withCredentials(AmqpCredentials(conf.user, conf.pass))
 
     AmqpSource.committableSource(
       NamedQueueSourceSettings(connectionProvider, queueName)
@@ -46,7 +46,7 @@ class AmqpHelper(conf: AmqpConf) {
 
   def getProducerGraph(queueName: String): RunnableGraph[SourceQueueWithComplete[JobDto]] = {
     val queueDeclaration = QueueDeclaration(queueName)
-    val connectionProvider = AmqpUriConnectionProvider(conf.url)
+    val connectionProvider = AmqpDetailsConnectionProvider(conf.host, conf.port).withCredentials(AmqpCredentials(conf.user, conf.pass))
 
     val amqpSink: Sink[ByteString, Future[Done]] =
       AmqpSink.simple(

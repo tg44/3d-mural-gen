@@ -1,0 +1,7 @@
+name: app
+subcomponents:
+- name: rabbitmq
+  type: helm
+  method: "git"
+  source: "https://github.com/helm/charts"
+  path: "stable/rabbitmq"

@@ -1,0 +1,36 @@
+subcomponents:
+  efk:
+    subcomponents:
+      elasticsearch:
+        config:
+          data:
+            persistence:
+              size: "2Gi"
+              storageClass: standard
+              accessMode: ReadWriteMany
+          master:
+            persistence:
+              size: "1Gi"
+              storageClass: standard
+              accessMode: ReadWriteMany
+  prometheus-grafana:
+    subcomponents:
+      grafana:
+        config:
+          persistence:
+            size: "1Gi"
+            storageClassName: standard
+            accessModes:
+              - ReadWriteMany
+      prometheus:
+        config:
+          alertmanager:
+            persistentVolume:
+              size: "1Gi"
+              storageClass: standard
+              accessMode: ReadWriteMany
+          server:
+            persistentVolume:
+              size: "1Gi"
+              storageClass: standard
+              accessMode: ReadWriteMany

@@ -1,0 +1,19 @@
+name: monitoring
+subcomponents:
+  - name: prometheus-grafana
+    type: component
+    method: "git"
+    branch: "master"
+    source: "https://github.com/microsoft/fabrikate-definitions"
+    path: "definitions/fabrikate-prometheus-grafana"
+  - name: efk
+    type: component
+    method: "git"
+    branch: "master"
+    source: "https://github.com/microsoft/fabrikate-definitions"
+    path: "definitions/fabrikate-elasticsearch-fluentd-kibana"
+  - name: kube-ops-view
+    type: helm
+    method: "git"
+    source: "https://github.com/helm/charts"
+    path: "stable/kube-ops-view"

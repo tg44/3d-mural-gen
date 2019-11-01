@@ -25,7 +25,6 @@ services:
     entrypoint: ""
     command: >
       sh -c "
-        aws --endpoint-url http://minio:9000 s3api create-bucket --bucket my.test.frankfurt
-        aws --endpoint-url http://minio:9000 s3api create-bucket --bucket my-test-us-east-1
+        aws --endpoint-url http://minio:9000 s3api create-bucket --bucket test
       "
 

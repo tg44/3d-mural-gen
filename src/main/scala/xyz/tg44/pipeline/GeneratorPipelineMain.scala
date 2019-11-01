@@ -8,12 +8,14 @@ import org.slf4j.LoggerFactory
 import xyz.tg44.cellpattern.ConwayTowerGenerator
 import xyz.tg44.mural.consumer.MuralGenerator
 import xyz.tg44.pipeline.server.{AkkaWebserver, ConwayTowerGeneratorApi, MuralGeneratorApi}
-import xyz.tg44.pipeline.utils.{Config, IdGenerator}
+import xyz.tg44.pipeline.utils.{Config, IdGenerator, LogBridge}
 
 import scala.concurrent.ExecutionContext
 import scala.util.Failure
 
 object GeneratorPipelineMain extends App {
+  LogBridge.initLogBridge()
+
   lazy val parallelism: Int = Runtime.getRuntime.availableProcessors()
 
   private val logger = LoggerFactory.getLogger("Main")
