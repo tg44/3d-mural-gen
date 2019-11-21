@@ -17,11 +17,49 @@ subcomponents:
     subcomponents:
       grafana:
         config:
+          image:
+            tag: 6.4.3
           persistence:
             size: "1Gi"
             storageClassName: standard
             accessModes:
               - ReadWriteMany
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+                - name: 'default'
+                  orgId: 1
+                  folder: ''
+                  type: file
+                  disableDeletion: false
+                  editable: true
+                  options:
+                    path: "/var/lib/grafana/dashboards/default"
+          dashboards:
+            default:
+              node-exporter:
+                gnetId: 1860
+                revision: 14
+                datasource: Prometheus
+              kubernetes-cluster:
+                gnetId: 7249
+                datasource: Prometheus
+              nginx-ingress:
+                gnetId: 9614
+                datasource: Prometheus
+              kubernetes-cluster-monitoring-prometheus:
+                gnetId: 1621
+                datasource: Prometheus
+              prometheus-overview-2:
+                gnetId: 3662
+                datasource: Prometheus
+              kubernetes-cluster-prometheus:
+                gnetId: 6417
+                datasource: Prometheus
+              rabbitmq-easy:
+                gnetId: 10982
+                datasource: Prometheus
       prometheus:
         config:
           alertmanager:

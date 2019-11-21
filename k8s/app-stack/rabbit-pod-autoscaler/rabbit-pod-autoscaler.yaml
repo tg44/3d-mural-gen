@@ -1,0 +1,80 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rabbit-pod-autoscaler
+  namespace: default
+rules:
+  - apiGroups:
+      - extensions
+      - apps
+    resources:
+      - deployments
+      - deployments/scale
+    verbs:
+      - get
+      - list
+      - update
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rabbit-pod-autoscaler
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: rabbit-pod-autoscaler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rabbit-pod-autoscaler
+subjects:
+  - kind: ServiceAccount
+    name: rabbit-pod-autoscaler
+    namespace: default
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: rabbit-pod-autoscaler
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rabbit-pod-autoscaler
+    spec:
+      nodeSelector:
+        kubernetes.io/role: master
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      serviceAccountName: rabbit-pod-autoscaler
+      containers:
+        - name: rabbit-pod-autoscaler
+          image: onfido/k8s-rabbit-pod-autoscaler
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 50Mi
+          env:
+            - name: INTERVAL
+              value: "30"
+            - name: RABBIT_HOST
+              value: "http://rabbitmq"
+            - name: RABBIT_USER
+              value: user
+            - name: RABBIT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq
+                  key: rabbitmq-password
+            - name: AUTOSCALING
+              value: >
+                1|10|32|default|printing-pipelines|test
+            - name: LOGS
+              value: HIGH

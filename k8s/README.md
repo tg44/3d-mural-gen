@@ -21,6 +21,13 @@ Interesting commands:
    - `kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo`
    - `export POD_NAME=$(kubectl get pods --namespace grafana -l "app=grafana,release=grafana" -o jsonpath="{.items[0].metadata.name}")`
    - `kubectl --namespace monitoring port-forward $POD_NAME 3000`
+   - reset pass to the secret value
+     ```
+     kubectl get secret --namespace grafana grafana -o jsonpath='{.data.admin-password}' \
+     | base64 --decode \
+     | xargs -I {} kubectl exec -it --namespace grafana $POD_NAME -- grafana-cli admin reset-admin-password {}
+     ```
+
  - kibana
    - `export POD_NAME=$(kubectl get pods --namespace kibana -l "app=kibana,release=kibana" -o jsonpath="{.items[0].metadata.name}")`
    - `kubectl --namespace kibana port-forward $POD_NAME 5601:5601`
@@ -37,3 +44,7 @@ Cleanup:
  - `minikube stop`
  - `minikube delete`
  
+
+For node autostarter you need labels on a master node:
+ - `kubernetes.io/role: master` on the master node
+ - `node-role.kubernetes.io/master`

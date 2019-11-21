@@ -4,8 +4,7 @@ subcomponents:
   type: component
   method: "local"
   path: "./monitoring-stack"
-- name: rabbitmq
-  type: helm
-  method: "git"
-  source: "https://github.com/helm/charts"
-  path: "stable/rabbitmq"
+- name: app-stack
+  type: component
+  method: "local"
+  path: "./app-stack"

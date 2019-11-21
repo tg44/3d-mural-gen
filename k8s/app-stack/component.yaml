@@ -5,3 +5,11 @@ subcomponents:
   method: "git"
   source: "https://github.com/helm/charts"
   path: "stable/rabbitmq"
+- name: printing-pipelines
+  type: static
+  method: "local"
+  path: "./printing-pipelines"
+- name: rabbit-pod-autoscaler
+  type: static
+  method: "local"
+  path: "./rabbit-pod-autoscaler"
