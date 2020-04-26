@@ -33,10 +33,17 @@ object Solids {
 
   trait Extrudable[A]
 
-  case class Extruded[A : Extrudable](twoD: A, height: Length, center: Boolean = false)(implicit val renderable: Renderable[A])
+  case class Extruded[A : Extrudable](twoD: A, height: Length, center: Boolean = false, scaleValue: Option[Double] = None, twist: Option[Angle] = None)(implicit val renderable: Renderable[A])
+
   case class Square(width: Length, height: Length)
-  case class Text(text: String, textCentered: Boolean = false, size: Int = 10)
+  case class Text(text: String, vAlign: Option[String] = None, hAlign: Option[String] = None, size: Option[Int] = None, font: Option[String] = None)
   case class Polygon(points: List[Point])
+
+  object Text {
+    def apply(text: String, textCentered: Boolean, size: Int): Text = {
+      Text(text, Option("center"), Option("center"), Option(size))
+    }
+  }
 
   case class Surface(heightMap: Seq[Seq[Double]])
   case class SurfaceFromFile(file: File)

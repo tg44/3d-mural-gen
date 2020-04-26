@@ -135,8 +135,14 @@ object OpenScad extends Renderer {
 
   implicit val textRenderer = new Renderable[Text] {
     override def render(s: Text, indent: Int)(implicit context: Path): String = {
-        val centered = if (s.textCentered) """, halign="center", valign="center"""" else ""
-        s"""${(" " * indent)}text("${s.text}"$centered, size=${s.size});
+        val attributes =
+          s.hAlign.map(a => s"""halign="$a"""") ::
+            s.vAlign.map(a => s"""valign="$a"""") ::
+            s.font.map(a => s"""font="$a"""") ::
+            s.size.map(a => s"""size=$a""") ::
+            Nil
+        val attrStr = attributes.collect{case Some(x) => x}.mkString(",", ",", "")
+        s"""${(" " * indent)}text("${s.text}"$attrStr);
            |""".stripMargin
     }
   }
@@ -153,7 +159,9 @@ object OpenScad extends Renderer {
 
   implicit def extrudedRenderer[A] = new Renderable[Extruded[A]] {
     override def render(s: Extruded[A], indent: Int)(implicit context: Path): String = {
-      (" "*indent) + "linear_extrude(" + length2Double(s.height) + ",center=" + (if (s.center) "true" else "false") + ")" + "\n" + s.renderable.render(s.twoD, indent+2)
+      val attributes = s.scaleValue.map(a => s"scale=$a") :: s.twist.map(a => s"twist=${a.toDegrees}") :: Nil
+      val attrStr = attributes.collect{case Some(x) => x}.mkString(",", ",", "")
+      (" "*indent) + "linear_extrude(" + length2Double(s.height) + ",center=" + (if (s.center) "true" else "false") + attrStr + ")" + "\n" + s.renderable.render(s.twoD, indent+2)
     }
   }
 
